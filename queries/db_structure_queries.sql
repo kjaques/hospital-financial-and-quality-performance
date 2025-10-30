@@ -2,6 +2,7 @@ SELECT COLUMN_NAME
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_NAME = 'finance';
 
+--When importing the CSVs, the empty cells were seen as empty strings and had to be imported as varchar data type. This updates the table to make these cells actual nulls to simplify later queries.  
 UPDATE finance
 SET fte_employees = NULLIF(fte_employees, ''),
 	interns_and_residents = NULLIF(interns_and_residents, ''),
@@ -16,12 +17,14 @@ SET fte_employees = NULLIF(fte_employees, ''),
 	total_charges = NULLIF(total_charges, ''),
 	total_salaries = NULLIF(total_salaries, ''),
 	total_patient_revenue = NULLIF(total_patient_revenue, ''),
+	net_patient_revenue = NULLIF(net_patient_revenue, ''),
 	less_operating_expense = NULLIF(less_operating_expense, ''),
 	net_income_from_service_to_patients = NULLIF(net_income_from_service_to_patients, ''),
 	total_income = NULLIF(total_income, ''),
 	net_income = NULLIF(net_income, ''),
 	cost_to_charge_ratio = NULLIF(cost_to_charge_ratio, '');
 
+--This updates the appropriate columns from varchar to numeric for calculations to simplify later queries.
 ALTER TABLE finance
 	ALTER COLUMN fte_employees TYPE numeric USING fte_employees::numeric,
 	ALTER COLUMN interns_and_residents TYPE numeric USING interns_and_residents::numeric,
@@ -36,9 +39,9 @@ ALTER TABLE finance
 	ALTER COLUMN total_charges TYPE numeric USING total_charges::numeric,
 	ALTER COLUMN total_salaries TYPE numeric USING total_salaries::numeric,
 	ALTER COLUMN total_patient_revenue TYPE numeric USING total_patient_revenue::numeric,
+	ALTER COLUMN net_patient_revenue TYPE numeric USING net_patient_revenue::numeric,
 	ALTER COLUMN less_operating_expense TYPE numeric USING less_operating_expense::numeric,
 	ALTER COLUMN net_income_from_service_to_patients TYPE numeric USING net_income_from_service_to_patients::numeric,
 	ALTER COLUMN total_income TYPE numeric USING total_income::numeric,
 	ALTER COLUMN net_income TYPE numeric USING net_income::numeric,
 	ALTER COLUMN cost_to_charge_ratio TYPE numeric USING cost_to_charge_ratio::numeric;
-
