@@ -2,7 +2,7 @@ WITH
 	finance AS (
 	--Cleaning and prepping finances table which contains all financial info.
 	SELECT 
-		RIGHT('00000' || CAST(facility_id AS VARCHAR(6)), 6)::varchar AS facility_id,
+		RIGHT('00000' || CAST(facility_id AS VARCHAR(6)), 6)::varchar AS facility_id,--Maintain 6 digit format with 0 at the front where needed to match other tables for merging.
 		name,
 		address,
 		city,
@@ -77,12 +77,15 @@ WITH
 			WHEN type_of_control = '12' THEN 'Governmental - City'
 			WHEN type_of_control = '13' THEN 'Governmental - Other'
 			ELSE 'UNKNOWN' END AS type_of_control,
-		total_costs::money,
-		total_charges::money,
-		ROUND(COALESCE(cost_to_charge_ratio, (total_costs/total_charges)), 4) AS cost_to_charge_ratio, --Some records didn't have the cost ratio despite having the necessary info. Calculated manually where needed.
-		ROUND(total_charges / total_costs * 100, 2) AS charge_pct, 
-		net_income::money,
-		ROUND(net_income_from_service_to_patients / net_patient_revenue * 100, 2) AS service_margin
+		total_costs::money,--Costs for care.
+		total_charges::money,--Charges for care.
+		ROUND(COALESCE(cost_to_charge_ratio, (total_costs/total_charges)), 4) AS cost_to_charge_ratio,--Some records didn't have the cost ratio despite having the necessary info. Calculated manually to impute where needed.
+		ROUND(total_charges / total_costs * 100, 2) AS charge_pct,--Incurred costs vs charges markup as a percentage for standardization.
+		net_patient_revenue::money,
+		less_operating_expense::money AS total_operating_expense,--Total operating expenses.
+		net_income_from_service_to_patients::money,--Patient revenue minus total operating expenses.
+		ROUND(net_income_from_service_to_patients / net_patient_revenue * 100, 2) AS service_margin, --Standardized measure as a percentage of revenue from patients after operating costs. Positive number is profit.
+		net_income::money --Includes other revenue such as sales or fundraising. Also includes "other" expenses such as non-operating expenses, interest, taxes, and depreciation.
 	FROM 
 		finances
 	WHERE 
@@ -126,7 +129,7 @@ WITH
 	FROM 
 		complications_and_deaths
 	WHERE
-		measure_id = 'Hybrid_HWM'
+		measure_id = 'Hybrid_HWM'--Standardized hospital-wide mortality metric for all causes.
 	),
 	readmission AS (
 	--Isolating readmission rates per facility.
@@ -144,10 +147,10 @@ WITH
 	FROM 
 		unplanned_visits
 	WHERE
-		measure_id = 'Hybrid_HWR'
+		measure_id = 'Hybrid_HWR'--Standardized hospital-wide readmission metric for all causes.
 	),
 	rating AS (
-	--Isolating patient satisfaction survey category scores and response rate and pivoting to one row per id.
+	--Isolating patient satisfaction survey category scores and response rate and pivoting to one row per facility id.
 	SELECT
 	    id,
 	    CAST(NULLIF(MAX(CASE WHEN question = 'Nurse communication - linear mean score' THEN
@@ -192,8 +195,11 @@ SELECT
 	total_charges,
 	cost_to_charge_ratio,
 	charge_pct,
-	net_income,
+	net_patient_revenue,
+	total_operating_expense,
+	net_income_from_service_to_patients,
 	service_margin,
+	net_income,
 	ruca_desc,
 	mortality_compared_to_national,
 	mortality_denominator,
