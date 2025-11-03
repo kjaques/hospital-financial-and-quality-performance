@@ -77,6 +77,7 @@ WITH
 			WHEN type_of_control = '12' THEN 'Governmental - City'
 			WHEN type_of_control = '13' THEN 'Governmental - Other'
 			ELSE 'UNKNOWN' END AS type_of_control,
+		total_discharges_for_adults_and_peds,
 		total_costs::money,--Costs for care.
 		total_charges::money,--Charges for care.
 		ROUND(COALESCE(cost_to_charge_ratio, (total_costs/total_charges)), 4) AS cost_to_charge_ratio,--Some records didn't have the cost ratio despite having the necessary info. Calculated manually to impute where needed.
@@ -191,15 +192,21 @@ SELECT
 	facility_type,
 	provider_type,
 	type_of_control,
+	total_discharges_for_adults_and_peds,
 	total_costs,
+	(total_costs / total_discharges_for_adults_and_peds)::money AS costs_per_discharge,
 	total_charges,
+	(total_charges / total_discharges_for_adults_and_peds)::money AS charges_per_discharge,
 	cost_to_charge_ratio,
 	charge_pct,
 	net_patient_revenue,
+	(net_patient_revenue / total_discharges_for_adults_and_peds)::money AS revenue_per_discharge,
 	total_operating_expense,
 	net_income_from_service_to_patients,
+	(net_income_from_service_to_patients / total_discharges_for_adults_and_peds)::money AS net_income_from_service_per_discharge,
 	service_margin,
 	net_income,
+	RANK() OVER (ORDER BY net_income DESC NULLS LAST) AS highest_net_income_rank,
 	ruca_desc,
 	mortality_compared_to_national,
 	mortality_denominator,
