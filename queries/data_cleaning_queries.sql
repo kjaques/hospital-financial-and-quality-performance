@@ -78,15 +78,15 @@ WITH
 			WHEN type_of_control = '13' THEN 'Governmental - Other'
 			ELSE 'UNKNOWN' END AS type_of_control,
 		total_discharges_for_adults_and_peds,
-		total_costs::money,--Costs for care.
-		total_charges::money,--Charges for care.
+		total_costs,--Costs for care.
+		total_charges,--Charges for care.
 		ROUND(COALESCE(cost_to_charge_ratio, (total_costs/total_charges)), 4) AS cost_to_charge_ratio,--Some records didn't have the cost ratio despite having the necessary info. Calculated manually to impute where needed.
 		ROUND(total_charges / total_costs * 100, 2) AS charge_pct,--Incurred costs vs charges markup as a percentage for standardization.
-		net_patient_revenue::money,
-		less_operating_expense::money AS total_operating_expense,--Total operating expenses.
-		net_income_from_service_to_patients::money,--Patient revenue minus total operating expenses.
+		net_patient_revenue,
+		less_operating_expense AS total_operating_expense,--Total operating expenses.
+		net_income_from_service_to_patients,--Patient revenue minus total operating expenses.
 		ROUND(net_income_from_service_to_patients / net_patient_revenue * 100, 2) AS service_margin, --Standardized measure as a percentage of revenue from patients after operating costs. Positive number is profit.
-		net_income::money --Includes other revenue such as sales or fundraising. Also includes "other" expenses such as non-operating expenses, interest, taxes, and depreciation.
+		net_income --Includes other revenue such as sales or fundraising. Also includes "other" expenses such as non-operating expenses, interest, taxes, and depreciation.
 	FROM 
 		finances
 	WHERE 
@@ -194,16 +194,16 @@ SELECT
 	type_of_control,
 	total_discharges_for_adults_and_peds,
 	total_costs,
-	(total_costs / total_discharges_for_adults_and_peds)::money AS costs_per_discharge,
+	(total_costs / total_discharges_for_adults_and_peds) AS costs_per_discharge,
 	total_charges,
-	(total_charges / total_discharges_for_adults_and_peds)::money AS charges_per_discharge,
+	(total_charges / total_discharges_for_adults_and_peds) AS charges_per_discharge,
 	cost_to_charge_ratio,
 	charge_pct,
 	net_patient_revenue,
-	(net_patient_revenue / total_discharges_for_adults_and_peds)::money AS revenue_per_discharge,
+	(net_patient_revenue / total_discharges_for_adults_and_peds) AS revenue_per_discharge,
 	total_operating_expense,
 	net_income_from_service_to_patients,
-	(net_income_from_service_to_patients / total_discharges_for_adults_and_peds)::money AS net_income_from_service_per_discharge,
+	(net_income_from_service_to_patients / total_discharges_for_adults_and_peds) AS net_income_from_service_per_discharge,
 	service_margin,
 	net_income,
 	RANK() OVER (ORDER BY net_income DESC NULLS LAST) AS highest_net_income_rank,
