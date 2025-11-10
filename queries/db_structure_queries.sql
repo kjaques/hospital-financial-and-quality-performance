@@ -1,9 +1,9 @@
 SELECT COLUMN_NAME
 FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME = 'finance';
+WHERE TABLE_NAME = 'financials';
 
 --When importing the CSVs, the empty cells were seen as empty strings and had to be imported as varchar data type. This updates the table to make these cells actual nulls to simplify later queries.  
-UPDATE finance
+UPDATE financials
 SET fte_employees = NULLIF(fte_employees, ''),
 	interns_and_residents = NULLIF(interns_and_residents, ''),
 	total_days = NULLIF(total_days, ''),
@@ -11,7 +11,7 @@ SET fte_employees = NULLIF(fte_employees, ''),
 	number_of_beds = NULLIF(number_of_beds, ''),
 	total_days_for_adults_and_peds = NULLIF(total_days_for_adults_and_peds, ''),
 	total_bed_days_available_for_adults_and_peds = NULLIF(total_bed_days_available_for_adults_and_peds, ''),
-	total_discharges_for_adults_and_peds = NULLIF(fte_employees, ''),
+	total_discharges_for_adults_and_peds = NULLIF(total_discharges_for_adults_and_peds, ''),
 	overhead_nonsal_costs = NULLIF(overhead_nonsal_costs, ''),
 	total_costs = NULLIF(total_costs, ''),
 	total_charges = NULLIF(total_charges, ''),
@@ -25,7 +25,7 @@ SET fte_employees = NULLIF(fte_employees, ''),
 	cost_to_charge_ratio = NULLIF(cost_to_charge_ratio, '');
 
 --This updates the appropriate columns from varchar to numeric for calculations to simplify later queries.
-ALTER TABLE finance
+ALTER TABLE financials
 	ALTER COLUMN fte_employees TYPE numeric USING fte_employees::numeric,
 	ALTER COLUMN interns_and_residents TYPE numeric USING interns_and_residents::numeric,
 	ALTER COLUMN total_days TYPE numeric USING total_days::numeric,
