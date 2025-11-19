@@ -81,7 +81,7 @@ WITH
 		ROUND(total_costs / (fiscal_year_end - fiscal_year_begin) * 364, 2) AS total_costs,--Costs for care.
 		ROUND(total_charges / (fiscal_year_end - fiscal_year_begin) * 364, 2) AS total_charges,--Charges for care.
 		ROUND(COALESCE(cost_to_charge_ratio, (total_costs/total_charges)), 4) AS cost_to_charge_ratio,--Some records didn't have the cost ratio despite having the necessary info. Calculated manually to impute where needed.
-		ROUND(total_charges / total_costs * 100, 2) AS charge_pct,--Incurred costs vs charges markup as a percentage for standardization.
+		ROUND((total_charges - total_costs) / total_costs * 100, 2) AS charge_pct,--Markup as a percentage of costs for standardization. 0 being at cost.
 		ROUND(net_patient_revenue / (fiscal_year_end - fiscal_year_begin) * 364, 2) AS net_patient_revenue,
 		ROUND(less_operating_expense / (fiscal_year_end - fiscal_year_begin) * 364, 2) AS total_operating_expense,--Total operating expenses.
 		ROUND(net_income_from_service_to_patients / (fiscal_year_end - fiscal_year_begin) * 364, 2) AS net_income_from_service_to_patients,--Patient revenue minus total operating expenses.
